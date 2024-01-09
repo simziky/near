@@ -7,29 +7,51 @@ import { PersistentUnorderedMap, context, PersistentMap, u128 } from "near-sdk-a
  * {@link nearBindgen} - it's a decorator that makes this class serializable so it can be persisted on the blockchain level. 
  */
 @nearBindgen
-export class Product {
+export class Campaign {
     id: string;
-    name: string;
+    title: string;
+    goal: u128;
+    raised: u128;
+    backers: PersistentMap<string, u128>;
     description: string;
     image: string;
     location: string;
-    price: u128;
     owner: string;
-    sold: u32;
-    public static fromPayload(payload: Product): Product {
-        const product = new Product();
-        product.id = payload.id;
-        product.name = payload.name;
-        product.description = payload.description;
-        product.image = payload.image;
-        product.location = payload.location;
-        product.price = payload.price;
-        product.owner = context.sender;
-        return product;
+    donators: u32;
+    public static fromPayload(payload: Campaign): Campaign {
+        const campaign = new Campaign();
+        campaign.id = payload.id;
+        campaign.title = payload.title;
+        campaign.description = payload.description;
+        campaign.raised = payload.raised;
+        campaign.goal = payload.goal;
+        campaign.backers = payload.backers;
+        campaign.image = payload.image;
+        campaign.location = payload.location;
+        campaign.owner = context.sender;
+        return campaign;
     }
-    public incrementSoldAmount(): void {
-        this.sold = this.sold + 1;
+    public incrementDonatedAmount(): void {
+        this.donators = this.donators + 1;
     }
+    public incrementTotalDonatedAmount(amount: u128): void {
+        this.raised = u128.add(this.raised, amount);
+    }
+
+    // Method to get the contribution of a specific backer
+    public getContribution(accountId: string): u128 {
+        const contribution = this.backers.get(accountId);
+        return contribution !== null ? contribution : u128.Zero;
+    }
+
+    public isGoalReached(): bool {
+        return u128.ge(this.raised, this.goal);
+    }
+
+    
+
+
+
 }
 
 /**
@@ -44,4 +66,4 @@ export class Product {
  * - the key of `PersistentUnorderedMap` is a `productId`
  * - the value in this `PersistentUnorderedMap` is a product itself `Product` that is related to a given key (`productId`)
  */
-export const productsStorage = new PersistentUnorderedMap<string, Product>("LISTED_PRODUCTS");
+export const crowdFundStorage = new PersistentUnorderedMap<string, Campaign>("LISTED_CAMPAIGNS");

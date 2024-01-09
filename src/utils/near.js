@@ -24,9 +24,9 @@ export async function initializeContract() {
     //  - setProduct  -> set_product
     {
       // List here all view methods
-      viewMethods: ["getProduct", "getProducts"],
+      viewMethods: ["getCampaign", "getCampaigns"],
       // List call methods that change state
-      changeMethods: ["buyProduct", "setProduct"],
+      changeMethods: ["setCampaign", "contribute"],
     }
   );
 }

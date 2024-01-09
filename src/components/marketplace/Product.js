@@ -3,12 +3,12 @@ import PropTypes from "prop-types";
 import { utils } from "near-api-js";
 import { Card, Button, Col, Badge, Stack } from "react-bootstrap";
 
-const Product = ({ product, buy }) => {
-  const { id, price, name, description, sold, location, image, owner } =
-    product;
+const Campaign = ({ campaign, buy }) => {
+  const { id, goal, name, description,donators, raised, location, image, owner } =
+    campaign;
 
   const triggerBuy = () => {
-    buy(id, price);
+    buy(id, goal);
   };
 
   return (
@@ -18,7 +18,7 @@ const Product = ({ product, buy }) => {
           <Stack direction="horizontal" gap={2}>
             <span className="font-monospace text-secondary">{owner}</span>
             <Badge bg="secondary" className="ms-auto">
-              {sold} Sold
+              {donators} backers
             </Badge>
           </Stack>
         </Card.Header>
@@ -31,12 +31,18 @@ const Product = ({ product, buy }) => {
           <Card.Text className="text-secondary">
             <span>{location}</span>
           </Card.Text>
+          <Card.Text className="text-secondary"
+          style={{display: 'flex', justifyContent: 'space-between'}}
+          >
+            <div>{utils.format.formatNearAmount(goal)}</div>
+            <div>{utils.format.formatNearAmount(raised)}</div>
+          </Card.Text>
           <Button
             variant="outline-dark"
-            onClick={triggerBuy}
             className="w-100 py-3"
+            onClick={triggerBuy}
           >
-            Buy for {utils.format.formatNearAmount(price)} NEAR
+            Buy for {utils.format.formatNearAmount(goal)} NEAR
           </Button>
         </Card.Body>
       </Card>
@@ -44,9 +50,9 @@ const Product = ({ product, buy }) => {
   );
 };
 
-Product.propTypes = {
-  product: PropTypes.instanceOf(Object).isRequired,
+Campaign.propTypes = {
+  campaign: PropTypes.instanceOf(Object).isRequired,
   buy: PropTypes.func.isRequired,
 };
 
-export default Product;
+export default Campaign;

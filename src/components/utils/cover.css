@@ -1,0 +1,42 @@
+.home-main {
+    min-height:100vh;
+    background-color: black;
+    
+    background-size: cover;
+    
+}
+
+.home-cont-main {
+    height: 100%;
+   
+}
+.home-cont{
+    display: flex;
+    justify-content:space-between;
+    gap: 50px;
+    align-items: center;
+}
+.home-cont .home-cont2{
+    height: 400px;
+    width: 700px;
+    background-image: url("../../assets/img/near.png");
+    background-repeat: no-repeat;
+    background-position: center left;
+    background-size: contain;
+    border-bottom-left-radius: 150px;
+    border-top-left-radius: 150px;
+    border: 5px solid white;
+    border-right: none;
+}
+.home-cont .home-cont1 > h1 {
+    font-size: 60px;
+    
+}
+.home-cont .home-cont1 > .p1 {
+    font-size: 16px;
+    
+}
+.home-cont .home-cont1{
+    padding-left: 20px;
+    
+}

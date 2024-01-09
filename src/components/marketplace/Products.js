@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import AddProduct from "./AddProduct";
-import Product from "./Product";
+import Campaign from "./Product";
 import Loader from "../utils/Loader";
 import { Row } from "react-bootstrap";
 
 import { NotificationSuccess, NotificationError } from "../utils/Notifications";
 import {
-  getProducts as getProductList,
-  buyProduct,
-  createProduct,
+  getCampaigns as getCampaignList,
+  donateFunds,
+  createCampaign,
 } from "../../utils/marketplace";
 
 const Products = () => {
-  const [products, setProducts] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // function to get the list of products
-  const getProducts = useCallback(async () => {
+  const getAllCampaign = useCallback(async () => {
     try {
       setLoading(true);
-      setProducts(await getProductList());
+      setCampaigns(await getCampaignList());
     } catch (error) {
       console.log({ error });
     } finally {
@@ -28,38 +28,38 @@ const Products = () => {
     }
   });
 
-  const addProduct = async (data) => {
+  const addCampaign = async (data) => {
     try {
       setLoading(true);
-      createProduct(data).then((resp) => {
-        getProducts();
+      createCampaign(data).then((resp) => {
+        getAllCampaign();
       });
-      toast(<NotificationSuccess text="Product added successfully." />);
+      toast(<NotificationSuccess text="Cmpaign created successfully." />);
     } catch (error) {
       console.log({ error });
-      toast(<NotificationError text="Failed to create a product." />);
+      toast(<NotificationError text="Failed to create a campaign." />);
     } finally {
       setLoading(false);
     }
   };
 
   //  function to initiate transaction
-  const buy = async (id, price) => {
+  const contribute = async (id, price) => {
     try {
-      await buyProduct({
+      await donateFunds({
         id,
         price,
-      }).then((resp) => getProducts());
-      toast(<NotificationSuccess text="Product bought successfully" />);
+      }).then((resp) => getAllCampaign());
+      toast(<NotificationSuccess text="Contributed to campaign successfully" />);
     } catch (error) {
-      toast(<NotificationError text="Failed to purchase product." />);
+      toast(<NotificationError text="Failed to contrubute to campaign." />);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getProducts();
+    getAllCampaign();
   }, []);
 
   return (
@@ -68,15 +68,15 @@ const Products = () => {
         <>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1 className="fs-4 fw-bold mb-0">Street Food</h1>
-            <AddProduct save={addProduct} />
+            <AddProduct save={addCampaign} />
           </div>
           <Row xs={1} sm={2} lg={3} className="g-3  mb-5 g-xl-4 g-xxl-5">
-            {products.map((_product) => (
-              <Product
-                product={{
-                  ..._product,
+            {campaigns.map((_campaign) => (
+              <Campaign
+              campaign={{
+                  ..._campaign,
                 }}
-                buy={buy}
+                contribute={contribute}
               />
             ))}
           </Row>

@@ -1,41 +1,18 @@
-import { Product, productsStorage } from './model';
-import { context, ContractPromiseBatch } from "near-sdk-as";
+import { Campaign, crowdFundStorage } from './model';
+import { context, ContractPromiseBatch, u128 } from "near-sdk-as";
 
-/**
- * 
- * This function changes the state of data in the blockchain. 
- * It is used to issue buy transactions when a product is purchased from a given seller (if the product is available)
- * 
- * @param productId - an identifier of a product that is the subject of purchase
- */
-export function buyProduct(productId: string): void {
-    const product = getProduct(productId);
-    if (product == null) {
-        throw new Error("product not found");
-    }
-    if (product.price.toString() != context.attachedDeposit.toString()) {
-        throw new Error("attached deposit should be greater than the product's price");
-    }
-    /*
-        `ContractPromiseBatch` is used here to create a transaction to transfer the money to the seller
-        The amount of money to be used in the transaction is taken from `context.attachedDeposit` 
-        which is defined by `--depositYocto=${AMOUNT}` parameter during the invocation 
-    */
-    ContractPromiseBatch.create(product.owner).transfer(context.attachedDeposit);
-    product.incrementSoldAmount();
-    productsStorage.set(product.id, product);
-}
+
 
 /**
  * 
  * @param product - a product to be added to the blockchain
  */
-export function setProduct(product: Product): void {
-    let storedProduct = productsStorage.get(product.id);
-    if (storedProduct !== null) {
-        throw new Error(`a product with id=${product.id} already exists`);
+export function setCampaign(campaign: Campaign): void {
+    let storedCampaign = crowdFundStorage.get(campaign.id);
+    if (storedCampaign !== null) {
+        throw new Error(`a product with id=${campaign.id} already exists`);
     }
-    productsStorage.set(product.id, Product.fromPayload(product));
+    crowdFundStorage.set(campaign.id, Campaign.fromPayload(campaign));
 }
 
 /**
@@ -45,8 +22,8 @@ export function setProduct(product: Product): void {
  * @param id - an identifier of a product to be returned
  * @returns a product for a given @param id
  */
-export function getProduct(id: string): Product | null {
-    return productsStorage.get(id);
+export function getCampaign(id: string): Campaign | null {
+    return crowdFundStorage.get(id);
 }
 
 /**
@@ -55,6 +32,37 @@ export function getProduct(id: string): Product | null {
  * 
  * @returns an array of objects that represent a product
  */
-export function getProducts(): Array<Product> {
-    return productsStorage.values();
+export function getCampaigns(): Array<Campaign> {
+    return crowdFundStorage.values();
 }
+
+export function contribute(campaignId: string): void {
+    const campaign = getCampaign(campaignId);
+    if (campaign == null) {
+        throw new Error("campaign not found");
+    }
+    const amount = context.attachedDeposit;
+    assert(amount > u128.Zero, "Contribution must be greater than 0");
+    
+    ContractPromiseBatch.create(campaign.owner).transfer(context.attachedDeposit);
+    // Update the total amount raised
+    campaign.incrementDonatedAmount();
+    campaign.incrementTotalDonatedAmount(amount);
+    crowdFundStorage.set(campaign.id, campaign);
+}
+/*
+export function withdraw(campaignId: string): void {
+    const campaign = getCampaign(campaignId);
+    if (campaign == null) {
+        throw new Error("campaign not found");
+    }
+    assert(campaign.isGoalReached(), "Goal not reached yet");
+    assert(context.sender == campaign.owner, "Only the owner can withdraw funds");
+
+    const amount = campaign.raised;
+    crowdFundStorage.delete("backers");
+    campaign.raised = u128.Zero;
+
+    ContractPromiseBatch.create(campaign.owner, amount);
+}
+**/
